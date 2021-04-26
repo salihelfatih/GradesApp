@@ -1,0 +1,353 @@
+<!--
+    Salih Salih, 000795395
+    April 3rd 2021
+
+    I, Salih Salih, student number 000795395,
+    certify that this material is my original work.
+    No other person's work has been used without due acknowledgment,
+    and I have not made my work available to anyone else.
+    
+-->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<style>
+		.main {
+			background-color: rgb(222, 225, 228);
+			font-family: verdana, sans-serif;
+		}
+
+		h1,
+		h4 {
+			text-align: center;
+		}
+
+		.GradeForm {
+			margin: 10px 0px 10px 0px;
+		}
+	</style>
+
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+		integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+	<script crossorigin src="https://unpkg.com/react@17/umd/react.development.js"></script>
+	<script crossorigin src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.26.0/babel.min.js"
+		integrity="sha512-kp7YHLxuJDJcOzStgd6vtpxr4ZU9kjn77e6dBsivSz+pUuAuMlE2UTdKB7jjsWT84qbS8kdCWHPETnP/ctrFsA=="
+		crossorigin="anonymous">
+	</script>
+
+	<title>Lab 6</title>
+
+	<script type="text/babel">
+		class GradeForm extends React.Component {
+			constructor(props) {
+				super(props);			
+				this.state = 
+				{ 
+					courseName: "", grade: 0,
+					validateCourseName: "", validiateGrade: ""
+				};
+			};
+
+			handleCourseNameChange(evt) {
+				this.setState({courseName: evt.target.value});
+				// console.log(evt.target.value);
+
+				if (evt.target.value.length != 0 && evt.target.value.trim() == "") {					
+					console.log("empty string!")
+					this.setState({validateCourseName : "Please enter a course name."})						
+				} else {
+					this.setState({validateCourseName : ""})						
+				}
+			}
+
+			handleGradeChange(evt) {
+				this.setState({grade: evt.target.value});
+				// console.log(evt.target.value);
+
+				if (evt.target.value < 0 || evt.target.value > 100) {
+					console.log("invalid value!")
+					this.setState({validiateGrade : "Please enter a grade between 0 and 100."})						
+				} 
+				
+				else {
+					this.setState({validiateGrade : ""})						
+				}
+			}
+
+			handleActionButton() {
+				let validInput = true;
+				
+				if (this.state.courseName.trim() == "" || this.state.courseName.trim().length == 0) {
+					console.log("empty string!")
+					this.setState({validateCourseName : "Please enter a course name."})					
+					validInput = false;
+				}
+
+				if (this.state.grade < 0 || this.state.grade > 100) {
+					console.log("invalid value!")
+					this.setState({validiateGrade : "Please enter a grade between 0 and 100."})					
+					validInput = false;
+				}
+
+				if (validInput === true) {
+					this.props.onClick(this.state.courseName, this.state.grade);
+					this.setState({courseName: "", grade: 0});
+				}				
+			}
+
+		
+			componentDidMount() {	
+				console.log("updated!")			
+				if (this.props.currentlyEditting) { 					
+					this.setState({courseName: this.props.currentlyEditting.courseName, grade: this.props.currentlyEditting.grade})
+				}
+			}
+			
+			render() {				
+				let actionButton = <button className="btn btn-dark" type="button" onClick={this.handleActionButton.bind(this)}>{this.props.mode}</button>	
+				
+				// if (this.props.currentlyEditing) {
+                //     actionButton = <td><button onClick={this.handleEditClick.bind(this)}>Edit</button></td>;
+                // }
+
+				return (
+					
+					<div className="GradeForm">
+						<h4 className="pb-2">Add Grade</h4>
+						<table className="d-flex justify-content-center table table-sm">
+							<tbody>
+								<tr>
+									<td>
+										<input type="text" className="form-control" placeholder="Course Name" value={this.state.courseName} 
+										onChange={this.handleCourseNameChange.bind(this)} />																								
+										<div className="invalid-feedback d-block">{this.state.validateCourseName}</div>
+									</td>
+
+									<td>
+										<input type="number" min="0" max="100" className="form-control"  placeholder="Grade" pattern="[0-9]*" 
+										value={this.state.grade} onChange={this.handleGradeChange.bind(this)} />
+										<div className="invalid-feedback d-block">{this.state.validiateGrade}</div>
+									</td>
+
+									<td>{actionButton}</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				)
+			}
+		}	
+		
+		class GradesList extends React.Component {
+			constructor(props) {
+				super(props);				
+			};
+
+			handleDeleteClick(grade) {
+				console.log("deleted!");
+            	// this.setState({activeGrade: grade});		
+				this.props.onDelete(grade);
+			}
+
+			handleEditClick(grade) {
+				console.log("editing!");
+            	// this.setState({activeGrade: grade});			
+				this.props.onEdit(grade);
+			}
+
+			render() {
+				let gradeRows = this.props.grades.map((g) => {									
+					return <tr key={g.id}>									
+								<td>{g.courseName}</td>
+								<td>{g.grade}</td>
+								<td><a className="btn btn-light" type="button" onClick={this.handleEditClick.bind(this, g.id)}>Edit</a></td>
+								<td><a className="btn btn-danger" type="button" onClick={this.handleDeleteClick.bind(this, g.id)}>Delete</a></td>
+							</tr>									
+				})
+
+				return (
+					<div className="GradesList">
+						<h4 className="pb-2">Grades</h4>		
+						<table className="table table-striped table-bordered">
+							<thead className="thead-dark">
+								<tr>									
+									<th>Course Name</th>
+									<th>Grade</th>
+									<th>Edit</th>
+									<th>Delete</th>
+								</tr>	
+							</thead>
+							<tbody>{gradeRows}</tbody>
+						</table>
+					</div>
+				)
+			}
+		}		
+
+		class GradesResults extends React.Component {
+			constructor(props) {
+				super(props);				
+			};
+
+			//  calcMax() {
+            //     return 0;
+            // }
+
+            // calcMin() {
+            //     return 0;
+            // }
+
+            // calcAvg() {
+            //     return 0;
+            // }
+
+			render() {
+				return (
+					<div className="GradesResults">
+							<h4 className="pb-2">Results</h4>	
+							<table className="table table-striped table-dark table-bordered">
+								<tbody>
+									<tr>
+										<th>Minimum</th>
+										<td>{this.props.min}</td>
+									</tr>
+
+									<tr>
+										<th>Maximum</th>
+										<td>{this.props.max}</td>
+									</tr>
+
+									<tr>
+										<th>Average</th>
+										<td>{this.props.avg}</td>																	
+									</tr>
+								</tbody>
+							</table>
+						</div>	
+				)
+			}
+		}		
+
+		class App extends React.Component {
+    		constructor(props){
+				super(props);
+				this.state = 
+				{ 	
+					grades: [
+						{id: 1, courseName: "React", grade: 80 },
+                        {id: 2, courseName: "Vue", grade: 90 },
+                        {id: 3, courseName: "Angular", grade: 70 },
+					],
+
+					min: null, max: null, avg: null, highestID: 1,
+					currentlyEditting: null				
+				}; 
+     		}
+			
+			// handleGradeSelect(grade) {
+            //     this.setState({currentlyEditing: grade});
+            // }
+
+			handleGradeChange(courseName, grade) {								
+				let newGrades = [];
+				if (this.state.currentlyEditting) {
+					for (let i =0; i < this.state.grades.length; i++ ) {
+						if (this.state.currentlyEditting.id == this.state.grades[i].id) {
+							let newRow = {id:this.state.currentlyEditting.id, courseName: courseName, grade: grade | 0 }
+							newGrades.push(newRow)
+							this.setState({currentlyEditting: null}) 
+						} 
+						
+						else {
+							newGrades.push(this.state.grades[i])
+						}
+					}
+
+				} else {
+					newGrades = [...this.state.grades];
+					var entry = this.state.highestID;
+					newGrades.push({id: entry.toString(), courseName: courseName, grade: grade | 0 });				
+				}
+
+				let min = 0, max = 100, sum = 0;
+				
+				for (let i = 0; i < newGrades.length; i++) {
+					let grade = newGrades[i].grade;
+					if (grade <= min ) { min = grade }
+					if (grade >= max ) { max = grade }
+					sum += grade | 0;
+				}
+
+				this.setState({min: min, max: max,	avg: sum / newGrades.length, highestID: entry + 1, grades: newGrades});
+			}
+
+			handleEditClick(grade) {
+				for (let i=0; i < this.state.grades.length; i++) {
+					if (this.state.grades[i].id == grade) {
+						this.setState({currentlyEditting: this.state.grades[i]})
+					}
+				}
+			}
+
+			handleDeleteClick(grade) {				
+				let newestGrades = []
+
+				for (let i=0; i < this.state.grades.length; i++) {
+					if (this.state.grades[i].id != grade) {
+						newestGrades.push(this.state.grades[i])
+					}
+				}
+			
+				// console.log(newestGrades)
+
+				let min = 100, max = 0, sum = 0, avg = 0;
+				if (newestGrades.length == 0) { min = 0, max = 0, avg =0;} 
+				
+				else {
+					
+					for (let i = 0; i < newestGrades.length; i++) {
+						let grade = newestGrades[i].grade;
+						if (grade <= min ) { min = grade }
+						if (grade >= max ) { max = grade }
+						sum += grade | 0;
+					}
+					avg = sum / newestGrades.length;
+				}
+
+				this.setState({min: min, max: max, avg: avg, grades: newestGrades});
+			}
+
+			render() {	
+				return (
+					<div className="container">
+						<header>
+							<h1 className="jumbotron-heading">Grades</h1>
+						</header>
+						{
+							this.state.currentlyEditting === null
+							? <GradeForm key={"Add"} onClick={this.handleGradeChange.bind(this)}  mode={"Add"} currentlyEditting={this.state.currentlyEditting }/>
+							: <GradeForm key={"Edit"} onClick={this.handleGradeChange.bind(this)} mode={"Edit"} currentlyEditting={this.state.currentlyEditting }/>
+						}						
+						<GradesList grades={this.state.grades} onDelete={this.handleDeleteClick.bind(this)} onEdit={this.handleEditClick.bind(this)} />						
+						<GradesResults max={this.state.max} min={this.state.min} avg={this.state.avg}/>											
+					</div>
+				);		
+			}
+		}
+
+		ReactDOM.render(<App />, document.getElementById('root'));
+
+	</script>
+</head>
+
+<body class="main">
+	<div id="root"></div>
+</body>
+
+</html>
